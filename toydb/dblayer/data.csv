@@ -1,4 +1,4 @@
-Country:string,Capital:string,Population:long
+Country:varchar,Capital:varchar,Population:int
 Afghanistan,Kabul,35530081
 Albania,Tirana,2930187
 Algeria,Algiers,41318142
