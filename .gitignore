@@ -1,0 +1,10 @@
+*.o 
+*.a 
+a.out* 
+*~ 
+data.db* 
+*db
+toydb/pflayer/test1 
+toydb/pflayer/test2 
+toydb/pflayer/testhash 
+toydb/pflayer/testpf
