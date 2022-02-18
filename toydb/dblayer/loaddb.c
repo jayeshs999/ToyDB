@@ -33,10 +33,10 @@ encode(Schema *sch, char **fields, byte *record, int spaceLeft) {
             total += EncodeCString(fields[i], record + total, MAX_LINE_LEN);
         }
         else if (col->type == INT){
-            total += EncodeInt((int)fields[i], record + total);
+            total += EncodeInt(atoi(fields[i]), record + total);
         }
         else{
-            total += EncodeLong((long long)fields[i], record + total);
+            total += EncodeLong(strtol(fields[i],NULL,10), record + total);
         }
     }
     return total;
