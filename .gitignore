@@ -3,7 +3,7 @@
 a.out* 
 *~ 
 data.db* 
-*db
+toydb/dblayer/*db
 toydb/pflayer/test1 
 toydb/pflayer/test2 
 toydb/pflayer/testhash 
