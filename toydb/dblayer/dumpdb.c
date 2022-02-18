@@ -34,7 +34,7 @@ printRow(void *callbackObj, RecId rid, byte *row, int len) {
             printf("%d,", dec);
         }
         else{
-            int dec = DecodeLong(cursor);
+            long long dec = DecodeLong(cursor);
             cursor+=8;
             printf("%lld,", dec);
         }
@@ -48,7 +48,7 @@ printRow(void *callbackObj, RecId rid, byte *row, int len) {
 void
 index_scan(Table *tbl, Schema *schema, int indexFD, int op, int value) {
     // UNIMPLEMENTED;
-    int scanDesc = AM_OpenIndexScan(indexFD, 'i', 4, op, value);
+    int scanDesc = AM_OpenIndexScan(indexFD, 'i', 4, op, (char *)&value);
 
     while (true){
         int recID = AM_FindNextEntry(scanDesc);
@@ -80,7 +80,7 @@ main(int argc, char **argv) {
 
     // UNIMPLEMENTED;
     int err;
-    err = Table_Open(DB_NAME, schema, 0, tbl);
+    err = Table_Open(DB_NAME, schema, 0, &tbl);
 
     if (argc == 2 && *(argv[1]) == 's') {
 	// UNIMPLEMENTED;
