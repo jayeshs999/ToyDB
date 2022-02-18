@@ -12,8 +12,34 @@ void
 printRow(void *callbackObj, RecId rid, byte *row, int len) {
     Schema *schema = (Schema *) callbackObj;
     byte *cursor = row;
-
-    UNIMPLEMENTED;
+    
+    // UNIMPLEMENTED;
+    // char res[MAX_LINE_LEN];
+    // int pos = 0;
+    for (int i=0; i<schema->numColumns; i++){
+        ColumnDesc *col = schema->columns[i];
+        if (col->type == VARCHAR){
+            char res[MAX_LINE_LEN];
+            int len = DecodeCString(cursor, res, MAX_LINE_LEN);
+            // pos += len;
+            // cursor += len;
+            // res[pos] = ',';
+            // pos+=1;
+            cursor += (len + 2);
+            printf("%s,", res);
+        }
+        else if (col->type == INT){
+            int dec = DecodeInt(cursor);
+            cursor+=4;
+            printf("%d,", dec);
+        }
+        else{
+            int dec = DecodeLong(cursor);
+            cursor+=8;
+            printf("%lld,", dec);
+        }
+    }
+    printf("\n");
 }
 
 #define DB_NAME "data.db"
@@ -21,7 +47,20 @@ printRow(void *callbackObj, RecId rid, byte *row, int len) {
 	 
 void
 index_scan(Table *tbl, Schema *schema, int indexFD, int op, int value) {
-    UNIMPLEMENTED;
+    // UNIMPLEMENTED;
+    int scanDesc = AM_OpenIndexScan(indexFD, 'i', 4, op, value);
+
+    while (true){
+        int recID = AM_FindNextEntry(scanDesc);
+        if (recID == AME_EOF) break;
+        byte * record;
+        int len = Table_Get(tbl, recID, record, MAX_LINE_LEN);
+        printRow((void *)schema, recID, record, len);
+    }
+
+    int err = AM_CloseIndexScan(scanDesc);
+    
+    
     /*
     Open index ...
     while (true) {
@@ -39,9 +78,15 @@ main(int argc, char **argv) {
     Schema *schema = parseSchema(schemaTxt);
     Table *tbl;
 
-    UNIMPLEMENTED;
+    // UNIMPLEMENTED;
+    int err;
+    err = Table_Open(DB_NAME, schema, 0, tbl);
+
     if (argc == 2 && *(argv[1]) == 's') {
-	UNIMPLEMENTED;
+	// UNIMPLEMENTED;
+    
+    Table_Scan(tbl, (void *)schema, printRow);
+
 	// invoke Table_Scan with printRow, which will be invoked for each row in the table.
     } else {
 	// index scan by default
