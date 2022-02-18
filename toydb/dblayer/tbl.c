@@ -51,6 +51,7 @@ int allocPageIfNeeded(Table* table,int len){
     parsedPageBuffer.offsets[0] = PF_PAGE_SIZE;
 
     table->lastPageDirty = 1;
+    return DBE_OK;
 }
 
 int getLastPage(int fd,int* pageNum,char **pageBuf){
