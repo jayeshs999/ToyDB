@@ -9,34 +9,43 @@
 #include "tbl.h"
 #include "util.h"
 
-#define checkerr(err) {if (err < 0) {PF_PrintError(); exit(1);}}
+#define checkerr(err)          \
+    {                          \
+        if (err < 0)           \
+        {                      \
+            PF_PrintError(""); \
+            exit(1);           \
+        }                      \
+    }
 
 #define MAX_PAGE_SIZE 4000
-
 
 #define DB_NAME "data.db"
 #define INDEX_NAME "data.db.0"
 #define CSV_NAME "data.csv"
 
-
 /*
 Takes a schema, and an array of strings (fields), and uses the functionality
 in codec.c to convert strings into compact binary representations
  */
-int
-encode(Schema *sch, char **fields, byte *record, int spaceLeft) {
+int encode(Schema *sch, char **fields, byte *record, int spaceLeft)
+{
     // UNIMPLEMENTED;
     int total = 0;
-    for (int i=0; i<sch->numColumns;i++){
+    for (int i = 0; i < sch->numColumns; i++)
+    {
         ColumnDesc *col = sch->columns[i];
-        if (col->type == VARCHAR){
+        if (col->type == VARCHAR)
+        {
             total += EncodeCString(fields[i], record + total, MAX_LINE_LEN);
         }
-        else if (col->type == INT){
+        else if (col->type == INT)
+        {
             total += EncodeInt(atoi(fields[i]), record + total);
         }
-        else{
-            total += EncodeLong(strtol(fields[i],NULL,10), record + total);
+        else
+        {
+            total += EncodeLong(strtol(fields[i], NULL, 10), record + total);
         }
     }
     return total;
@@ -49,19 +58,22 @@ encode(Schema *sch, char **fields, byte *record, int spaceLeft) {
 }
 
 Schema *
-loadCSV() {
+loadCSV()
+{
     // Open csv file, parse schema
     FILE *fp = fopen(CSV_NAME, "r");
-    if (!fp) {
-	perror("data.csv could not be opened");
+    if (!fp)
+    {
+        perror("data.csv could not be opened");
         exit(EXIT_FAILURE);
     }
 
     char buf[MAX_LINE_LEN];
     char *line = fgets(buf, MAX_LINE_LEN, fp);
-    if (line == NULL) {
-	fprintf(stderr, "Unable to read data.csv\n");
-	exit(EXIT_FAILURE);
+    if (line == NULL)
+    {
+        fprintf(stderr, "Unable to read data.csv\n");
+        exit(EXIT_FAILURE);
     }
 
     // Open main db file
@@ -82,28 +94,37 @@ loadCSV() {
     char *tokens[MAX_TOKENS];
     char record[MAX_PAGE_SIZE];
 
-    while ((line = fgets(buf, MAX_LINE_LEN, fp)) != NULL) {
-	int n = split(line, ",", tokens);
-	assert (n == sch->numColumns);
-	int len = encode(sch, tokens, record, sizeof(record));
-	RecId rid;
+    while ((line = fgets(buf, MAX_LINE_LEN, fp)) != NULL)
+    {
+        int n = split(line, ",", tokens);
+        assert(n == sch->numColumns);
+        int len = encode(sch, tokens, record, sizeof(record));
+        RecId rid;
 
-	// UNIMPLEMENTED;
-    rid = Table_Insert(tbl, record, len, &rid);
+        // UNIMPLEMENTED;
+        err = Table_Insert(tbl, record, len, &rid);
+        checkerr(err);
 
-	printf("%d %s\n", rid, tokens[0]);
+        printf("%d %s\n", rid, tokens[0]);
 
-	// Indexing on the population column 
-	int population = atoi(tokens[2]);
+        // Indexing on the population column
+        int population = atoi(tokens[2]);
 
-    
-    err = AM_InsertEntry(indexFD, 'i', 4, (char*)&population, rid);
+        char value[MAX_LINE_LEN];
+        sprintf(value, "%d", population);
 
-	// UNIMPLEMENTED;
-	// Use the population field as the field to index on
+        // DEBUG
+        printf("%s\n", value);
 
-	    
-	checkerr(err);
+        err = AM_InsertEntry(indexFD, 'i', 4, value, rid);
+
+        // UNIMPLEMENTED;
+        // Use the population field as the field to index on
+        printf("%d\n", err);
+        checkerr(err);
+        // printf("check1\n");
+        // printf("%d\n", err);
+        // printf("check2\n");
     }
     fclose(fp);
     Table_Close(tbl);
@@ -112,7 +133,7 @@ loadCSV() {
     return sch;
 }
 
-int
-main() {
+int main()
+{
     loadCSV();
 }

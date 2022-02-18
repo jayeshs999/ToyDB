@@ -8,8 +8,8 @@
 #include "../pflayer/pf.h"
 
 #define SLOT_COUNT_OFFSET 2
-#define checkerr(err) {if (err < 0) {PF_PrintError(); exit(EXIT_FAILURE);}}
-#define reterr(err) {if(err<0) {PF_PrintError(); return err;}}
+#define checkerr(err) {if (err < 0) {PF_PrintError(""); exit(EXIT_FAILURE);}}
+#define reterr(err) {if(err<0) {PF_PrintError(""); return err;}}
 
 // int  getLen(int slot, byte *pageBuf); UNIMPLEMENTED;
 // int  getNumSlots(byte *pageBuf); UNIMPLEMENTED;
@@ -161,9 +161,6 @@ Table_Insert(Table *tbl, byte *record, int len, RecId *rid) {
     return DBE_OK;
     
 }
-
-#define checkerr(err) {if (err < 0) {PF_PrintError(); exit(EXIT_FAILURE);}}
-
 /*
   Given an rid, fill in the record (but at most maxlen bytes).
   Returns the number of bytes copied.
