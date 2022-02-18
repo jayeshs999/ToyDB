@@ -26,7 +26,7 @@ int isFree(char* pageBuf,int len){
     PageBuffer parsedPageBuffer;
     parsePageBuf(pageBuf,&parsedPageBuffer); 
     int numRecords = *(parsedPageBuffer.numRecords);
-    int start = (parsedPageBuffer.freeSpace - pageBuf);
+    int start = (*parsedPageBuffer.freeSpace - pageBuf);
     int end = parsedPageBuffer.offsets[numRecords];
     return (end - start) >= (len+2);  
 }
@@ -127,11 +127,11 @@ Table_Open(char *dbname, Schema *schema, bool overwrite, Table **ptable)
 
 void
 Table_Close(Table *tbl) {
-    Pagelist *openPage = tbl->openPage;
-    while(openPage != NULL){
-        checkerr(PF_UnfixPage(tbl->fd,openPage->pageNum, openPage->dirty));
-        openPage = openPage->next;
-    }
+    //Pagelist *openPage = tbl->openPage;
+    // while(openPage != NULL){
+    //     checkerr(PF_UnfixPage(tbl->fd,openPage->pageNum, openPage->dirty));
+    //     openPage = openPage->next;
+    // }
     if(tbl->lastPage != -1){
         checkerr(PF_UnfixPage(tbl->fd,tbl->lastPage,tbl->lastPageDirty));
     }

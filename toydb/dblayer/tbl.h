@@ -19,11 +19,11 @@ typedef struct {
     ColumnDesc **columns; // array of column descriptors
 } Schema;
 
-typedef struct{
-    int pageNum;
-    int dirty;
-    struct Pagelist* next;
-} Pagelist;
+// typedef struct{
+//     int pageNum;
+//     int dirty;
+//     Pagelist* next;
+// } Pagelist;
 
 typedef struct{
     int* numRecords;
@@ -33,9 +33,8 @@ typedef struct{
 
 typedef struct {
     Schema *schema;
-
     int fd;
-    struct PageList* openPage;
+    //PageList* openPage;
     int lastPage;
     char* lastPageBuf;
     int lastPageDirty;
