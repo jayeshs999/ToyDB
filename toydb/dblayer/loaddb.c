@@ -74,8 +74,7 @@ loadCSV()
 
     int err;
     Table_Open(DB_NAME, sch, 0, &tbl);
-    checkAMerr(AM_CreateIndex(INDEX_NAME, 1, 'i', 4));
-    checkerr(PF_CreateFile(INDEX_NAME));
+    checkAMerr(AM_CreateIndex(DB_NAME, 0, 'i', 4));
     int indexFD = PF_OpenFile(INDEX_NAME);
 
     // UNIMPLEMENTED;
