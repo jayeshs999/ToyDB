@@ -153,7 +153,7 @@ Table_Insert(Table *tbl, byte *record, int len, RecId *rid) {
     parsedPageBuffer.offsets[*parsedPageBuffer.numRecords] = recordOffset;
     *parsedPageBuffer.freeSpace += 2;
     memcpy(tbl->lastPageBuf+recordOffset,record,len); 
-    
+    tbl->lastPageDirty = 1;
     *rid = tbl->lastPage << 16 | (*parsedPageBuffer.numRecords-1);
     return DBE_OK;
     
@@ -195,7 +195,9 @@ Table_Scan(Table *tbl, void *callbackObj, ReadFunc callbackfn) {
     
     int pageNum;
     char* pageBuf;
-
+    if(tbl->lastPage != -1){
+        checkerr(PF_UnfixPage(tbl->fd,tbl->lastPage,tbl->lastPageDirty));
+    }
     int err = PF_GetFirstPage(tbl->fd,&pageNum,&pageBuf);
 
     if(err == PFE_EOF){
@@ -213,11 +215,14 @@ Table_Scan(Table *tbl, void *callbackObj, ReadFunc callbackfn) {
             byte* record = pageBuf + recordOffset;
             callbackfn(callbackObj,rid,record,recordLen);
         }
-        if(pageNum != tbl->lastPage){
-            checkerr(PF_UnfixPage(tbl->fd,pageNum,0));
-        }
+        checkerr(PF_UnfixPage(tbl->fd,pageNum,0));
     }
     while((err = PF_GetNextPage(tbl->fd,&pageNum,&pageBuf)) != PFE_EOF);
+
+    if(tbl->lastPage != -1){
+        checkerr(PF_GetThisPage(tbl->fd,tbl->lastPage,&tbl->lastPageBuf));
+        tbl->lastPageDirty = 0;
+    }
 
 }
 
