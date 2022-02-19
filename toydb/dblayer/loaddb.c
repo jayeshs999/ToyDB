@@ -9,15 +9,6 @@
 #include "tbl.h"
 #include "util.h"
 
-#define checkerr(err)          \
-    {                          \
-        if (err < 0)           \
-        {                      \
-            PF_PrintError(""); \
-            exit(1);           \
-        }                      \
-    }
-
 #define MAX_PAGE_SIZE 4000
 
 #define DB_NAME "data.db"
@@ -79,14 +70,12 @@ loadCSV()
     // Open main db file
     Schema *sch = parseSchema(line);
     Table *tbl;
-    // tbl = malloc(sizeof(tbl));
+    PF_Init();
+
     int err;
     Table_Open(DB_NAME, sch, 0, &tbl);
-    err = AM_CreateIndex(INDEX_NAME, 1, 'i', 4);
-    checkerr(err);
-    PF_Init();
-    err = PF_CreateFile(INDEX_NAME);
-    checkerr(err);
+    checkAMerr(AM_CreateIndex(INDEX_NAME, 1, 'i', 4));
+    checkerr(PF_CreateFile(INDEX_NAME));
     int indexFD = PF_OpenFile(INDEX_NAME);
 
     // UNIMPLEMENTED;
@@ -101,9 +90,7 @@ loadCSV()
         int len = encode(sch, tokens, record, sizeof(record));
         RecId rid;
 
-        // UNIMPLEMENTED;
-        err = Table_Insert(tbl, record, len, &rid);
-        checkerr(err);
+        checkerr(Table_Insert(tbl, record, len, &rid));
 
         printf("%d %s\n", rid, tokens[0]);
 
@@ -112,24 +99,13 @@ loadCSV()
 
         char value[MAX_LINE_LEN];
         sprintf(value, "%d", population);
-
-        // DEBUG
-        printf("%s\n", value);
-
-        err = AM_InsertEntry(indexFD, 'i', 4, value, rid);
-
-        // UNIMPLEMENTED;
+        
         // Use the population field as the field to index on
-        printf("%d\n", err);
-        checkerr(err);
-        // printf("check1\n");
-        // printf("%d\n", err);
-        // printf("check2\n");
+        checkAMerr(AM_InsertEntry(indexFD, 'i', 4, value, rid));
     }
     fclose(fp);
     Table_Close(tbl);
-    err = PF_CloseFile(indexFD);
-    checkerr(err);
+    checkerr(PF_CloseFile(indexFD));
     return sch;
 }
 

@@ -6,6 +6,9 @@
 #define INT     2
 #define LONG    3
 #define DBE_OK  0 
+#define checkerr(err) {if (err < 0) {char info[50];sprintf(info,"%s:%d: Error in %s ",__FILE__,__LINE__,__func__);PF_PrintError(info); exit(EXIT_FAILURE);}}
+#define reterr(err) {if(err<0) {char info[50];sprintf(info,"%s:%d: Error in %s\n\t",__FILE__,__LINE__,__func__);PF_PrintError(info); return err;}}
+#define checkAMerr(err) {if (err < 0) {char info[50];sprintf(info,"%s:%d: Error in %s\n\t",__FILE__,__LINE__,__func__);AM_PrintError(info); exit(EXIT_FAILURE);}}
 
 typedef char byte;
 

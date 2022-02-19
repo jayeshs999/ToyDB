@@ -8,8 +8,6 @@
 #include "../pflayer/pf.h"
 
 #define SLOT_COUNT_OFFSET 2
-#define checkerr(err) {if (err < 0) {PF_PrintError(""); exit(EXIT_FAILURE);}}
-#define reterr(err) {if(err<0) {PF_PrintError(""); return err;}}
 
 // int  getLen(int slot, byte *pageBuf); UNIMPLEMENTED;
 // int  getNumSlots(byte *pageBuf); UNIMPLEMENTED;
@@ -98,7 +96,6 @@ Table_Open(char *dbname, Schema *schema, bool overwrite, Table **ptable)
 
     Table* table = malloc(sizeof(Table));
 
-    PF_Init();
     if(overwrite){
         err = PF_DestroyFile(dbname);
         if(err == PFE_FILEOPEN)
