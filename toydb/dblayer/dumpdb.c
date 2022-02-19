@@ -44,9 +44,7 @@ void printRow(void *callbackObj, RecId rid, byte *row, int len)
 
 void index_scan(Table *tbl, Schema *schema, int indexFD, int op, int value)
 {
-    char val[MAX_LINE_LEN];
-    sprintf(val,"%d",value);
-    int scanDesc = AM_OpenIndexScan(indexFD, 'i', 4, op, val);
+    int scanDesc = AM_OpenIndexScan(indexFD, 'i', 4, op, (char*)&value);
     checkAMerr(scanDesc);
 
     while (true)
@@ -74,7 +72,7 @@ int main(int argc, char **argv)
 
     if (argc == 2 && *(argv[1]) == 's')
     {
-
+        printf("%s\n",schemaTxt);
         Table_Scan(tbl, (void *)schema, printRow);
 
         // invoke Table_Scan with printRow, which will be invoked for each row in the table.

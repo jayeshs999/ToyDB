@@ -96,11 +96,8 @@ loadCSV()
         // Indexing on the population column
         int population = atoi(tokens[2]);
 
-        char value[MAX_LINE_LEN];
-        sprintf(value, "%d", population);
-        
         // Use the population field as the field to index on
-        checkAMerr(AM_InsertEntry(indexFD, 'i', 4, value, rid));
+        checkAMerr(AM_InsertEntry(indexFD, 'i', 4, (char*)&population, rid));
     }
     fclose(fp);
     Table_Close(tbl);
