@@ -19,20 +19,22 @@ void printRow(void *callbackObj, RecId rid, byte *row, int len)
             char res[MAX_LINE_LEN];
             int len = DecodeCString(cursor, res, MAX_LINE_LEN);
             cursor += (len + 2);
-            printf("%s,", res);
+            printf("%s", res);
         }
         else if (col->type == INT)
         {
             int dec = DecodeInt(cursor);
             cursor += 4;
-            printf("%d,", dec);
+            printf("%d", dec);
         }
         else
         {
             long long dec = DecodeLong(cursor);
             cursor += 8;
-            printf("%lld,", dec);
+            printf("%lld", dec);
         }
+        if(i != schema->numColumns - 1)
+            printf(",");
     }
     printf("\n");
 }
@@ -42,8 +44,9 @@ void printRow(void *callbackObj, RecId rid, byte *row, int len)
 
 void index_scan(Table *tbl, Schema *schema, int indexFD, int op, int value)
 {
-
-    int scanDesc = AM_OpenIndexScan(indexFD, 'i', 4, op, (char *)&value);
+    char val[MAX_LINE_LEN];
+    sprintf(val,"%d",value);
+    int scanDesc = AM_OpenIndexScan(indexFD, 'i', 4, op, val);
     checkAMerr(scanDesc);
 
     while (true)
@@ -52,7 +55,7 @@ void index_scan(Table *tbl, Schema *schema, int indexFD, int op, int value)
         if (recID == AME_EOF)
             break;
         checkAMerr(recID);
-        byte *record;
+        byte record[MAX_LINE_LEN];
         int len = Table_Get(tbl, recID, record, MAX_LINE_LEN);
         checkerr(len);
         printRow((void *)schema, recID, record, len);
