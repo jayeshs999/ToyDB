@@ -70,11 +70,11 @@ loadCSV()
     // Open main db file
     Schema *sch = parseSchema(line);
     Table *tbl;
-    
+
     // Open the table and initialise the file for indexing
     PF_Init();
     int err;
-    Table_Open(DB_NAME, sch, 0, &tbl);
+    Table_Open(DB_NAME, sch, 1, &tbl);
     checkAMerr(AM_CreateIndex(DB_NAME, 0, 'i', 4));
     int indexFD = PF_OpenFile(INDEX_NAME);
 
