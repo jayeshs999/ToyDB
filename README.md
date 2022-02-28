@@ -137,12 +137,10 @@ The ```index_scan``` function initializes the scan descriptor based on the opera
 ## Contributors
 
 ### Jayesh Singla - 190050053
-- Implemented the functions in tbl.c
+Implemented the functions in tbl.c and contributed to debugging.
 
 ### Shrey Singla - 190050114
-- Implemented loaddb.c and dumpdb.c
-
-Both of us contributed in debugging the code
+Implemented loaddb.c and dumpdb.c and contributed to debugging.
 
 ## References
 
