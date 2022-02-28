@@ -74,7 +74,6 @@ int main(int argc, char **argv)
 
     if (argc == 2 && *(argv[1]) == 's')
     {
-        // printf("%s\n",schemaTxt);
         Table_Scan(tbl, (void *)schema, printRow);
 
         // invoke Table_Scan with printRow, which will be invoked for each row in the table.

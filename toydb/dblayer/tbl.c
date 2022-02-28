@@ -10,73 +10,80 @@
 #define SLOT_COUNT_OFFSET 2
 
 /*
-   Parses a page buffer and stores the metadata information 
+   Parses a page buffer and stores the metadata information
    in the PageBuffer struct
 */
 void parsePageBuf(char *pageBuf, PageBuffer *parsedPageBuffer)
 {
-    parsedPageBuffer->numRecords = pageBuf; // Pointer to the location where number of records are stored
+    parsedPageBuffer->numRecords = pageBuf;    // Pointer to the location where number of records are stored
     parsedPageBuffer->freeSpace = pageBuf + 4; // Pointer to the location where free space starts
-    parsedPageBuffer->offsets = pageBuf + 8; // Pointer to the location where offsets array starts
+    parsedPageBuffer->offsets = pageBuf + 8;   // Pointer to the location where offsets array starts
 }
 
 /*
    Helper functions
 */
-int getLen(int slot, byte *pageBuf){
+int getLen(int slot, byte *pageBuf)
+{
     PageBuffer parsedPageBuffer;
     parsePageBuf(pageBuf, &parsedPageBuffer); // Parse the buffer
-    return parsedPageBuffer.offsets[slot] - parsedPageBuffer.offsets[slot+1];
+    return parsedPageBuffer.offsets[slot] - parsedPageBuffer.offsets[slot + 1];
 }
-int getNumSlots(byte *pageBuf){
+int getNumSlots(byte *pageBuf)
+{
     PageBuffer parsedPageBuffer;
     parsePageBuf(pageBuf, &parsedPageBuffer); // Parse the buffer
     return *parsedPageBuffer.numRecords;
 }
-void setNumSlots(byte *pageBuf, int nslots){
+void setNumSlots(byte *pageBuf, int nslots)
+{
     PageBuffer parsedPageBuffer;
     parsePageBuf(pageBuf, &parsedPageBuffer); // Parse the buffer
     *parsedPageBuffer.numRecords = nslots;
 }
 
-int getNthSlotOffset(int slot, char* pageBuf){
+int getNthSlotOffset(int slot, char *pageBuf)
+{
     PageBuffer parsedPageBuffer;
     parsePageBuf(pageBuf, &parsedPageBuffer); // Parse the buffer
-    return parsedPageBuffer.offsets[slot+1];
+    return parsedPageBuffer.offsets[slot + 1];
 }
 
-void setNthSlotOffset(int slot, short offset, char* pageBuf){
+void setNthSlotOffset(int slot, short offset, char *pageBuf)
+{
     PageBuffer parsedPageBuffer;
     parsePageBuf(pageBuf, &parsedPageBuffer); // Parse the buffer
-    parsedPageBuffer.offsets[slot+1] = offset;
+    parsedPageBuffer.offsets[slot + 1] = offset;
 }
 
-char* getFreeSpace(char* pageBuf){
+char *getFreeSpace(char *pageBuf)
+{
     PageBuffer parsedPageBuffer;
     parsePageBuf(pageBuf, &parsedPageBuffer); // Parse the buffer
     return *parsedPageBuffer.freeSpace;
 }
 
-void setFreeSpace(char* pageBuf, char* pointer){
+void setFreeSpace(char *pageBuf, char *pointer)
+{
     PageBuffer parsedPageBuffer;
     parsePageBuf(pageBuf, &parsedPageBuffer); // Parse the buffer
     *parsedPageBuffer.freeSpace = pointer;
 }
 
 /*
-   Checks if the page buffer has enough space to store a 
+   Checks if the page buffer has enough space to store a
    record of length len.
 */
 int isFree(char *pageBuf, int len)
 {
     int numRecords = getNumSlots(pageBuf);
-    int start = (getFreeSpace(pageBuf) - pageBuf); // Offset of free space
-    int end = getNthSlotOffset(numRecords-1,pageBuf); // Offset of last record
-    return (end - start) >= (len + 2); // Check if free space is enough to store the record and its offset
+    int start = (getFreeSpace(pageBuf) - pageBuf);       // Offset of free space
+    int end = getNthSlotOffset(numRecords - 1, pageBuf); // Offset of last record
+    return (end - start) >= (len + 2);                   // Check if free space is enough to store the record and its offset
 }
 
 /*
-  Allocates and initializes a new page if there is no page 
+  Allocates and initializes a new page if there is no page
   in the table or there is not enough space in the last page
 */
 int allocPageIfNeeded(Table *table, int len)
@@ -151,9 +158,6 @@ int getLastPage(int fd, int *pageNum, char **pageBuf)
     return DBE_OK;
 }
 
-
-
-
 /*
    Opens a paged file, creating one if it doesn't exist, and optionally
    overwriting it.
@@ -210,7 +214,7 @@ void Table_Close(Table *tbl)
 
     // Close the opened file
     checkerr(PF_CloseFile(tbl->fd));
-    
+
     // Free the table struct
     free(tbl);
 }
@@ -220,17 +224,17 @@ int Table_Insert(Table *tbl, byte *record, int len, RecId *rid)
     // Allocate a fresh page if len is not enough for remaining space
     // Get the next free slot on page, and copy record in the free space
     // Update slot and free space index information on top of page.
-    
+
     // Allocate a new page if needed according to record length
     reterr(allocPageIfNeeded(tbl, len));
 
     // Update metadata
     int numRecords = getNumSlots(tbl->lastPageBuf);
-    short recordOffset = getNthSlotOffset(numRecords-1,tbl->lastPageBuf) - len;
+    short recordOffset = getNthSlotOffset(numRecords - 1, tbl->lastPageBuf) - len;
     numRecords++;
-    setNumSlots(tbl->lastPageBuf,numRecords);
-    setNthSlotOffset(numRecords-1,recordOffset,tbl->lastPageBuf);
-    setFreeSpace(tbl->lastPageBuf,getFreeSpace(tbl->lastPageBuf)+2);
+    setNumSlots(tbl->lastPageBuf, numRecords);
+    setNthSlotOffset(numRecords - 1, recordOffset, tbl->lastPageBuf);
+    setFreeSpace(tbl->lastPageBuf, getFreeSpace(tbl->lastPageBuf) + 2);
 
     // Copy the record into the buffer and set it to dirty
     memcpy(tbl->lastPageBuf + recordOffset, record, len);
@@ -269,8 +273,8 @@ int Table_Get(Table *tbl, RecId rid, byte *record, int maxlen)
     }
 
     // Get the record offset and length
-    short recordOffset = getNthSlotOffset(slot,pageBuf);
-    int len = getLen(slot,pageBuf);
+    short recordOffset = getNthSlotOffset(slot, pageBuf);
+    int len = getLen(slot, pageBuf);
     len = len > maxlen ? maxlen : len;
 
     // Copy the record into the record buffer
@@ -289,7 +293,7 @@ void Table_Scan(Table *tbl, void *callbackObj, ReadFunc callbackfn)
 
     int pageNum;
     char *pageBuf;
-    
+
     // Unfix the last page if it exists
     if (tbl->lastPage != -1)
     {
@@ -315,8 +319,8 @@ void Table_Scan(Table *tbl, void *callbackObj, ReadFunc callbackfn)
             RecId rid = pageNum << 16 | i; // Calculate record id
 
             // Get the record offset and length
-            short recordOffset = getNthSlotOffset(i,pageBuf);
-            int recordLen = getLen(i,pageBuf);
+            short recordOffset = getNthSlotOffset(i, pageBuf);
+            int recordLen = getLen(i, pageBuf);
 
             byte *record = pageBuf + recordOffset;
 
